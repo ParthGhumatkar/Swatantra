@@ -185,7 +185,7 @@ export default function DashboardHome() {
   const profileLink = `${baseUrl}/p/${provider.slug}`;
   const displayDomain = baseUrl.replace(/^https?:\/\//, '');
   const today = new Date().getDay();
-  const todayAvail = availability.find(a => a.day_of_week === today);
+  const todayAvail = availability[today] || { morning: false, afternoon: false, evening: false, dayOff: false };
   const slots = todayAvail ? [
     { label: 'Morning', on: todayAvail.morning },
     { label: 'Afternoon', on: todayAvail.afternoon },
