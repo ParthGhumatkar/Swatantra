@@ -253,7 +253,7 @@ export default function PublicProfileClient({ provider, availability }) {
 
         {/* ── URL FOOTER ── */}
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#333330', textAlign: 'center', paddingBottom: '16px', margin: 0 }}>
-          {(process.env.NEXT_PUBLIC_APP_URL || 'https://locallink.in').replace(/^https?:\/\//, '')}/p/{provider.slug}
+          {(process.env.NEXT_PUBLIC_APP_URL || 'https://swatantra.vercel.app').replace(/^https?:\/\//, '')}/p/{provider.slug}
         </p>
       </div>
 

@@ -159,7 +159,7 @@ export default function ProfilePage() {
           </button>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
           <p className="font-mono text-[12px] mt-4" style={{ color: 'var(--text-secondary)' }}>
-            {(process.env.NEXT_PUBLIC_APP_URL || 'https://locallink.in').replace(/^https?:\/\//, '')}/p/{provider.slug}
+            {(process.env.NEXT_PUBLIC_APP_URL || 'https://swatantra.vercel.app').replace(/^https?:\/\//, '')}/p/{provider.slug}
           </p>
         </div>
 

@@ -152,7 +152,7 @@ export default function DashboardHome() {
     setTimeout(() => setToast(''), 2200);
   };
 
-  const getBaseUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://locallink.in';
+  const getBaseUrl = () => process.env.NEXT_PUBLIC_APP_URL || 'https://swatantra.vercel.app';
 
   const copyLink = () => {
     if (!provider) return;

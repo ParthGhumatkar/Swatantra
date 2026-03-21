@@ -46,8 +46,8 @@ export default function LandingPage() {
         style={{ background: 'rgba(15,15,15,0.85)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #1E1E1E' }}
       >
         <Link href="/" className="font-display text-[20px] font-bold tracking-tight">
-          <span style={{ color: 'var(--text-primary)' }}>Local</span>
-          <span style={{ color: 'var(--accent)' }}>Link</span>
+          <span style={{ color: 'var(--text-primary)' }}>Swat</span>
+          <span style={{ color: 'var(--accent)' }}>antra</span>
         </Link>
         <div className="flex items-center gap-3">
           <Link
@@ -104,13 +104,6 @@ export default function LandingPage() {
             style={{ background: 'var(--accent)', color: '#000' }}
           >
             Create Your Page Free
-          </Link>
-          <Link
-            href="/p/demo"
-            className="font-body text-lg rounded-2xl px-8 py-4 transition-all duration-200"
-            style={{ border: '1px solid var(--border)', color: 'var(--text-primary)' }}
-          >
-            See an example →
           </Link>
         </div>
 
@@ -251,7 +244,7 @@ export default function LandingPage() {
               </button>
 
               {/* URL bar */}
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#444440', textAlign: 'center', margin: 0 }}>locallink.in/p/rahul-electrician-pune</p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: '#444440', textAlign: 'center', margin: 0 }}>swatantra.vercel.app/p/rahul-electrician-pune</p>
             </div>
           </div>
         </div>
@@ -343,7 +336,7 @@ export default function LandingPage() {
           <div className="rounded-2xl p-6" style={{ background: '#0F1A10', border: '1px solid rgba(76,175,125,0.2)' }}>
             <div className="flex items-center gap-2 mb-5">
               <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#4CAF7D' }} />
-              <span className="font-body text-[14px]" style={{ color: '#4CAF7D' }}>LocalLink</span>
+              <span className="font-body text-[14px]" style={{ color: '#4CAF7D' }}>Swatantra</span>
             </div>
             <div className="space-y-3">
               {wins.map((win, i) => (
@@ -459,8 +452,8 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <p className="font-display text-[20px] font-bold">
-                <span style={{ color: 'var(--text-primary)' }}>Local</span>
-                <span style={{ color: 'var(--accent)' }}>Link</span>
+                <span style={{ color: 'var(--text-primary)' }}>Swat</span>
+                <span style={{ color: 'var(--accent)' }}>antra</span>
               </p>
               <p className="font-body text-[13px] mt-2" style={{ color: 'var(--text-secondary)' }}>Built for independent professionals in India.</p>
             </div>
@@ -478,7 +471,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="mt-8 pt-8 text-center" style={{ borderTop: '1px solid var(--border)' }}>
-            <p className="font-body text-[12px]" style={{ color: 'var(--text-secondary)' }}>© {new Date().getFullYear()} LocalLink. Made with ❤️ in India.</p>
+            <p className="font-body text-[12px]" style={{ color: 'var(--text-secondary)' }}>© {new Date().getFullYear()} Swatantra. Made with ❤️ in India.</p>
           </div>
         </div>
       </footer>

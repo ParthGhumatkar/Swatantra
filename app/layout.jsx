@@ -6,7 +6,7 @@ const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-dm-sans', display
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono', display: 'swap' });
 
 export const metadata = {
-  title: 'LocalLink - Your Service, Your Link',
+  title: 'Swatantra - Your Service, Your Link',
   description: 'Create a professional profile page and receive booking requests from customers',
 };
 
