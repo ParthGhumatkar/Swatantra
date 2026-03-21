@@ -46,8 +46,7 @@ export default function LandingPage() {
         style={{ background: 'rgba(15,15,15,0.85)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid #1E1E1E' }}
       >
         <Link href="/" className="font-display text-[20px] font-bold tracking-tight">
-          <span style={{ color: 'var(--text-primary)' }}>Swat</span>
-          <span style={{ color: 'var(--accent)' }}>antra</span>
+          <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, color: '#F5F5F0', letterSpacing: '-0.02em' }}>Swatantra<span style={{ color: '#F5A623' }}>.</span></span>
         </Link>
         <div className="flex items-center gap-3">
           <Link
@@ -104,6 +103,13 @@ export default function LandingPage() {
             style={{ background: 'var(--accent)', color: '#000' }}
           >
             Create Your Page Free
+          </Link>
+          <Link
+            href="/p/demo"
+            className="font-body text-lg rounded-2xl px-8 py-4 transition-all duration-200"
+            style={{ border: '1px solid var(--border)', color: 'var(--text-primary)' }}
+          >
+            See what your page looks like →
           </Link>
         </div>
 
@@ -452,8 +458,7 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
               <p className="font-display text-[20px] font-bold">
-                <span style={{ color: 'var(--text-primary)' }}>Swat</span>
-                <span style={{ color: 'var(--accent)' }}>antra</span>
+                <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, color: '#F5F5F0', letterSpacing: '-0.02em' }}>Swatantra<span style={{ color: '#F5A623' }}>.</span></span>
               </p>
               <p className="font-body text-[13px] mt-2" style={{ color: 'var(--text-secondary)' }}>Built for independent professionals in India.</p>
             </div>

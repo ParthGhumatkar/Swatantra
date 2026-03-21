@@ -50,9 +50,8 @@ export default function Sidebar({ provider, pendingCount, subscription }) {
     >
       {/* Logo */}
       <div style={{ padding: '20px 20px 0' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, margin: 0, lineHeight: 1 }}>
-          <span style={{ color: '#F5F5F0' }}>Swat</span>
-          <span style={{ color: '#F5A623' }}>antra</span>
+        <h1 style={{ fontFamily: 'Sora, sans-serif', fontSize: '20px', fontWeight: 700, margin: 0, lineHeight: 1, letterSpacing: '-0.02em', color: '#F5F5F0' }}>
+          Swatantra<span style={{ color: '#F5A623' }}>.</span>
         </h1>
         <div style={{ height: '1px', background: 'linear-gradient(90deg, rgba(245,166,35,0.3), transparent)', marginTop: '14px' }} />
       </div>

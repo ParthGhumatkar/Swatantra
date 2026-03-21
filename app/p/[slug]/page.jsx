@@ -15,6 +15,7 @@ async function getProvider(slug) {
 }
 
 async function getAvailability(providerId) {
+  await sql`ALTER TABLE availability ADD COLUMN IF NOT EXISTS day_off BOOLEAN DEFAULT false`;
   const rows = await sql`
     SELECT day_of_week, morning, afternoon, evening, day_off
     FROM availability

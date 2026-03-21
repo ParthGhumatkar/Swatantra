@@ -53,8 +53,7 @@ export default function LoginPage() {
           style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
         >
           <h1 className="font-display text-[22px] font-bold mb-6">
-            <span style={{ color: 'var(--accent)' }}>S</span>
-            <span style={{ color: 'var(--text-primary)' }}>watantra</span>
+            <span style={{ fontFamily: 'Sora, sans-serif', fontWeight: 700, color: '#F5F5F0', letterSpacing: '-0.02em' }}>Swatantra<span style={{ color: '#F5A623' }}>.</span></span>
           </h1>
 
           <h2 className="font-display text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>Welcome back</h2>
