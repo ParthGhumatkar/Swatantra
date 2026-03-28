@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Bell, CalendarDays, UserCircle, Copy, CheckCheck, CheckCircle2, MessageCircle, Eye, QrCode, Clipboard, Moon } from 'lucide-react';
+import { Bell, CalendarDays, UserCircle, Copy, CheckCheck, CheckCircle2, MessageCircle, Eye, QrCode, Clipboard, Moon, X, Download } from 'lucide-react';
+import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -111,6 +112,8 @@ export default function DashboardHome() {
   const [availability, setAvailability] = useState([]);
   const [copied, setCopied] = useState(false);
   const [toast, setToast] = useState('');
+  const [qrOpen, setQrOpen] = useState(false);
+  const qrCanvasRef = useRef(null);
   const [loading, setLoading] = useState(true);
 
   const animatedPending = useCountUp(pendingCount);
@@ -161,6 +164,16 @@ export default function DashboardHome() {
     setCopied(true);
     showToast('Link copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadQr = () => {
+    const canvas = qrCanvasRef.current?.querySelector('canvas');
+    if (!canvas) return;
+    const url = canvas.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `qr-${provider.slug}.png`;
+    a.click();
   };
 
   const shareWhatsApp = () => {
@@ -292,6 +305,7 @@ export default function DashboardHome() {
             Share on WhatsApp
           </button>
           <button
+            onClick={() => setQrOpen(true)}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'transparent', color: '#888884', border: '1px solid #1E1E1E', borderRadius: '10px', padding: '10px 16px', fontFamily: 'var(--font-display)', fontSize: '13px', cursor: 'pointer', transition: 'all 0.2s' }}
             onMouseEnter={e => { e.currentTarget.style.color = '#F5F5F0'; e.currentTarget.style.borderColor = '#2A2A2A'; }}
             onMouseLeave={e => { e.currentTarget.style.color = '#888884'; e.currentTarget.style.borderColor = '#1E1E1E'; }}
@@ -463,6 +477,55 @@ export default function DashboardHome() {
       </div>
 
       <Toast message={toast} visible={!!toast} />
+
+      {/* ── QR CODE MODAL ── */}
+      {qrOpen && (
+        <div
+          onClick={() => setQrOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{ background: '#0F0F0F', border: '1px solid #2A2A2A', borderRadius: '24px', padding: '32px 28px 28px', width: '100%', maxWidth: '360px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setQrOpen(false)}
+              style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.06)', border: '1px solid #2A2A2A', borderRadius: '8px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#888884', transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#F5F5F0'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#888884'; }}
+            >
+              <X size={14} />
+            </button>
+
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '10px', color: '#F5A623', textTransform: 'uppercase', letterSpacing: '0.15em', margin: 0 }}>Scan to Book</p>
+
+            {/* Visible QR */}
+            <div style={{ background: '#FFFFFF', borderRadius: '16px', padding: '16px', display: 'inline-flex' }}>
+              <QRCodeSVG value={profileLink} size={200} bgColor="#FFFFFF" fgColor="#0F0F0F" level="M" />
+            </div>
+
+            {/* Hidden canvas for download */}
+            <div ref={qrCanvasRef} style={{ display: 'none' }}>
+              <QRCodeCanvas value={profileLink} size={400} bgColor="#FFFFFF" fgColor="#0F0F0F" level="M" />
+            </div>
+
+            {/* URL label */}
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#888884', margin: 0, textAlign: 'center', wordBreak: 'break-all' }}>{profileLink}</p>
+
+            {/* Download button */}
+            <button
+              onClick={downloadQr}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#F5A623', color: '#000', borderRadius: '12px', padding: '12px 24px', border: 'none', fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', width: '100%', justifyContent: 'center', transition: 'opacity 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '0.88'; }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
+            >
+              <Download size={15} />
+              Download QR
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

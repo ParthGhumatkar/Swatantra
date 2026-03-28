@@ -12,6 +12,7 @@ function buildMap(rows) {
       afternoon: !!row?.afternoon,
       evening: !!row?.evening,
       dayOff: !!row?.day_off,
+      timeSlots: row?.time_slots ?? [],
     };
   }
   return map;
@@ -35,9 +36,10 @@ export async function GET(request) {
     }
 
     await sql`ALTER TABLE availability ADD COLUMN IF NOT EXISTS day_off BOOLEAN DEFAULT false`;
+    await sql`ALTER TABLE availability ADD COLUMN IF NOT EXISTS time_slots TEXT[] DEFAULT '{}'`;
 
     let rows = await sql`
-      SELECT day_of_week, morning, afternoon, evening, day_off
+      SELECT day_of_week, morning, afternoon, evening, day_off, time_slots
       FROM availability
       WHERE provider_id = ${providerId}
       ORDER BY day_of_week ASC
@@ -57,7 +59,7 @@ export async function GET(request) {
         ON CONFLICT (provider_id, day_of_week) DO NOTHING
       `;
       rows = await sql`
-        SELECT day_of_week, morning, afternoon, evening, day_off
+        SELECT day_of_week, morning, afternoon, evening, day_off, time_slots
         FROM availability
         WHERE provider_id = ${providerId}
         ORDER BY day_of_week ASC
@@ -80,24 +82,30 @@ export async function PATCH(request) {
     if (!payload) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
     const body = await request.json();
-    const { dayOfWeek, morning, afternoon, evening, dayOff } = body;
+    const { dayOfWeek, dayOff, timeSlots } = body;
 
     if (dayOfWeek === undefined || dayOfWeek < 0 || dayOfWeek > 6) {
       return NextResponse.json({ error: 'dayOfWeek must be 0–6' }, { status: 400 });
     }
 
-    const m = !!morning;
-    const af = !!afternoon;
-    const ev = !!evening;
+    const slots = Array.isArray(timeSlots) ? timeSlots.filter(t => typeof t === 'string') : [];
+    const m = slots.some(t => t >= '06:00' && t < '12:00');
+    const af = slots.some(t => t >= '12:00' && t < '17:00');
+    const ev = slots.some(t => t >= '17:00' && t < '22:00');
     const off = !!dayOff;
 
-    const updated = await sql`
-      INSERT INTO availability (provider_id, day_of_week, morning, afternoon, evening, day_off)
-      VALUES (${payload.provider_id}, ${dayOfWeek}, ${m}, ${af}, ${ev}, ${off})
-      ON CONFLICT (provider_id, day_of_week)
-      DO UPDATE SET morning = ${m}, afternoon = ${af}, evening = ${ev}, day_off = ${off}
-      RETURNING day_of_week, morning, afternoon, evening, day_off
-    `;
+    const updated = await sql(
+      `INSERT INTO availability (provider_id, day_of_week, morning, afternoon, evening, day_off, time_slots)
+       VALUES ($1, $2, $3, $4, $5, $6, $7::text[])
+       ON CONFLICT (provider_id, day_of_week) DO UPDATE SET
+         morning = EXCLUDED.morning,
+         afternoon = EXCLUDED.afternoon,
+         evening = EXCLUDED.evening,
+         day_off = EXCLUDED.day_off,
+         time_slots = EXCLUDED.time_slots
+       RETURNING *`,
+      [payload.provider_id, dayOfWeek, m, af, ev, off, slots]
+    );
 
     return NextResponse.json({ success: true, day: updated[0] });
   } catch (error) {

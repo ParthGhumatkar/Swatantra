@@ -16,8 +16,9 @@ async function getProvider(slug) {
 
 async function getAvailability(providerId) {
   await sql`ALTER TABLE availability ADD COLUMN IF NOT EXISTS day_off BOOLEAN DEFAULT false`;
+  await sql`ALTER TABLE availability ADD COLUMN IF NOT EXISTS time_slots TEXT[] DEFAULT '{}'`;
   const rows = await sql`
-    SELECT day_of_week, morning, afternoon, evening, day_off
+    SELECT day_of_week, morning, afternoon, evening, day_off, time_slots
     FROM availability
     WHERE provider_id = ${providerId}
     ORDER BY day_of_week
@@ -30,6 +31,7 @@ async function getAvailability(providerId) {
       afternoon: !!row?.afternoon,
       evening: !!row?.evening,
       dayOff: !!row?.day_off,
+      timeSlots: row?.time_slots ?? [],
     };
   }
   return map;

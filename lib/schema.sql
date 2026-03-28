@@ -26,6 +26,8 @@ CREATE TABLE availability (
   morning BOOLEAN DEFAULT false,
   afternoon BOOLEAN DEFAULT false,
   evening BOOLEAN DEFAULT false,
+  day_off BOOLEAN DEFAULT false,
+  time_slots TEXT[] DEFAULT '{}',
   UNIQUE(provider_id, day_of_week)
 );
 

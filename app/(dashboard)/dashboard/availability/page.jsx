@@ -6,8 +6,25 @@ import { Loader2, CheckCircle2 } from 'lucide-react';
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-const DEFAULT_DAY = { morning: false, afternoon: false, evening: false, dayOff: false };
+const DEFAULT_DAY = { dayOff: true, timeSlots: [] };
 const DEFAULT_AVAIL = Object.fromEntries(Array.from({ length: 7 }, (_, i) => [i, { ...DEFAULT_DAY }]));
+
+const ALL_SLOTS = [];
+for (let h = 6; h <= 22; h++) {
+  for (const m of [0, 30]) {
+    if (h === 22 && m === 30) break;
+    const hh = String(h).padStart(2, '0');
+    const mm = String(m).padStart(2, '0');
+    ALL_SLOTS.push(`${hh}:${mm}`);
+  }
+}
+
+function to12hr(t) {
+  const [h, m] = t.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${period}`;
+}
 
 function ToggleSwitch({ on, onClick }) {
   return (
@@ -19,12 +36,6 @@ function ToggleSwitch({ on, onClick }) {
     </button>
   );
 }
-
-const SLOT_CFG = [
-  { field: 'morning',   label: 'Morning',   color: '#F5A623', text: '#000' },
-  { field: 'afternoon', label: 'Afternoon', color: '#60A5FA', text: '#000' },
-  { field: 'evening',   label: 'Evening',   color: '#4CAF7D', text: '#000' },
-];
 
 export default function AvailabilityPage() {
   const [availability, setAvailability] = useState(DEFAULT_AVAIL);
@@ -41,7 +52,10 @@ export default function AvailabilityPage() {
           const map = {};
           for (let i = 0; i < 7; i++) {
             const row = d.availability[i] ?? d.availability[String(i)];
-            map[i] = { morning: !!row?.morning, afternoon: !!row?.afternoon, evening: !!row?.evening, dayOff: !!row?.dayOff };
+            map[i] = {
+              dayOff: row?.dayOff === undefined ? true : !!row?.dayOff,
+              timeSlots: Array.isArray(row?.timeSlots) ? row.timeSlots : [],
+            };
           }
           setAvailability(map);
         }
@@ -54,31 +68,49 @@ export default function AvailabilityPage() {
     fetch('/api/availability', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dayOfWeek: dayIndex, ...updated }),
+      body: JSON.stringify({
+        dayOfWeek: dayIndex,
+        dayOff: !!updated.dayOff,
+        timeSlots: Array.isArray(updated.timeSlots) ? updated.timeSlots : [],
+      }),
     });
 
-  const handleToggle = async (dayIndex, field) => {
-    const current = availability[dayIndex];
-    const updated = field === 'dayOff'
-      ? { ...current, dayOff: !current.dayOff }
-      : { ...current, [field]: !current[field], dayOff: false };
-    setAvailability(prev => ({ ...prev, [dayIndex]: updated }));
+  const setDay = async (dayIndex, nextDay, previousDay) => {
+    setAvailability(prev => ({ ...prev, [dayIndex]: nextDay }));
     setSaving(dayIndex);
     try {
-      await patchDay(dayIndex, updated);
+      await patchDay(dayIndex, nextDay);
       setSaving(null);
       setSaved(dayIndex);
       setTimeout(() => setSaved(s => s === dayIndex ? null : s), 2000);
     } catch {
-      setAvailability(prev => ({ ...prev, [dayIndex]: current }));
+      setAvailability(prev => ({ ...prev, [dayIndex]: previousDay }));
       setSaving(null);
     }
   };
 
+  const toggleDayOff = async (dayIndex) => {
+    const current = availability[dayIndex];
+    const next = current.dayOff
+      ? { ...current, dayOff: false }
+      : { dayOff: true, timeSlots: [] };
+    await setDay(dayIndex, next, current);
+  };
+
+  const toggleSlot = async (dayIndex, slot) => {
+    const current = availability[dayIndex];
+    const set = new Set(Array.isArray(current.timeSlots) ? current.timeSlots : []);
+    if (set.has(slot)) set.delete(slot);
+    else set.add(slot);
+    const nextSlots = Array.from(set).sort();
+    const next = { dayOff: false, timeSlots: nextSlots };
+    await setDay(dayIndex, next, current);
+  };
+
   const setAllWeekdays = async () => {
-    if (!confirm('Set Mon–Fri as available (Morning + Afternoon)?')) return;
+    if (!confirm('Set Mon–Fri as available?')) return;
     const next = { ...availability };
-    [1, 2, 3, 4, 5].forEach(d => { next[d] = { morning: true, afternoon: true, evening: false, dayOff: false }; });
+    [1, 2, 3, 4, 5].forEach(d => { next[d] = { dayOff: false, timeSlots: [] }; });
     setAvailability(next);
     for (const d of [1, 2, 3, 4, 5]) await patchDay(d, next[d]);
   };
@@ -86,7 +118,7 @@ export default function AvailabilityPage() {
   const clearAll = async () => {
     if (!confirm('Clear all availability?')) return;
     const cleared = {};
-    for (let i = 0; i < 7; i++) cleared[i] = { morning: false, afternoon: false, evening: false, dayOff: false };
+    for (let i = 0; i < 7; i++) cleared[i] = { dayOff: true, timeSlots: [] };
     setAvailability(cleared);
     for (let i = 0; i < 7; i++) await patchDay(i, cleared[i]);
   };
@@ -143,14 +175,10 @@ export default function AvailabilityPage() {
             >
               <p style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#888884', margin: 0 }}>{DAY_SHORT[i]}</p>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '3px', marginTop: '5px' }}>
-                {day?.dayOff ? (
+                {!day || day?.dayOff || (Array.isArray(day?.timeSlots) && day.timeSlots.length === 0) ? (
                   <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#444440', lineHeight: 1 }}>—</span>
                 ) : (
-                  <>
-                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: day?.morning ? '#F5A623' : '#2A2A2A', display: 'inline-block', flexShrink: 0 }} />
-                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: day?.afternoon ? '#60A5FA' : '#2A2A2A', display: 'inline-block', flexShrink: 0 }} />
-                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: day?.evening ? '#4CAF7D' : '#2A2A2A', display: 'inline-block', flexShrink: 0 }} />
-                  </>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#F5A623', display: 'inline-block', flexShrink: 0 }} />
                 )}
               </div>
             </div>
@@ -163,7 +191,7 @@ export default function AvailabilityPage() {
         {Array.from({ length: 7 }, (_, dayIndex) => {
           const day = availability[dayIndex];
           const isToday = dayIndex === today;
-          const hasSlot = day?.morning || day?.afternoon || day?.evening;
+          const hasSlot = Array.isArray(day?.timeSlots) && day.timeSlots.length > 0;
           const isSaving = saving === dayIndex;
           const isSaved = saved === dayIndex;
           const borderColor = day?.dayOff ? 'rgba(255,107,107,0.15)' : hasSlot ? 'rgba(245,166,35,0.2)' : '#2A2A2A';
@@ -173,7 +201,9 @@ export default function AvailabilityPage() {
               key={dayIndex}
               style={{
                 background: day?.dayOff ? '#161210' : '#1A1A1A',
-                border: `1px solid ${borderColor}`,
+                borderTop: `1px solid ${borderColor}`,
+                borderRight: `1px solid ${borderColor}`,
+                borderBottom: `1px solid ${borderColor}`,
                 borderLeft: isToday ? '3px solid rgba(245,166,35,0.5)' : `1px solid ${borderColor}`,
                 borderRadius: '16px',
                 padding: '14px 18px',
@@ -206,41 +236,51 @@ export default function AvailabilityPage() {
                 )}
               </div>
 
-              {/* CENTER — Slot buttons */}
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', flex: 1 }}>
-                {SLOT_CFG.map(({ field, label, color, text }) => {
-                  const isActive = !!day?.[field] && !day?.dayOff;
-                  return (
-                    <button
-                      key={field}
-                      onClick={() => handleToggle(dayIndex, field)}
-                      disabled={!!day?.dayOff}
-                      style={{
-                        borderRadius: '20px',
-                        padding: '5px 14px',
-                        border: isActive ? 'none' : '1px solid #2A2A2A',
-                        background: isActive ? color : 'transparent',
-                        color: isActive ? text : '#444440',
-                        fontFamily: 'var(--font-body)',
-                        fontSize: '13px',
-                        fontWeight: 500,
-                        cursor: day?.dayOff ? 'not-allowed' : 'pointer',
-                        opacity: day?.dayOff ? 0.35 : 1,
-                        transition: 'all 0.15s',
-                      }}
-                      onMouseEnter={e => { if (!day?.dayOff && !isActive) { e.currentTarget.style.borderColor = 'rgba(245,166,35,0.3)'; e.currentTarget.style.color = '#888884'; } }}
-                      onMouseLeave={e => { if (!day?.dayOff && !isActive) { e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.color = '#444440'; } }}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
+              {/* CENTER — Slot pills */}
+              {!day?.dayOff && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', flex: 1 }}>
+                  {ALL_SLOTS.map((slot) => {
+                    const isActive = Array.isArray(day?.timeSlots) && day.timeSlots.includes(slot);
+                    return (
+                      <button
+                        key={slot}
+                        onClick={() => toggleSlot(dayIndex, slot)}
+                        style={{
+                          borderRadius: '9999px',
+                          padding: '6px 12px',
+                          border: isActive ? '1px solid rgba(245,166,35,0.8)' : '1px solid #2A2A2A',
+                          background: isActive ? 'rgba(245,166,35,0.08)' : 'transparent',
+                          color: isActive ? '#F5A623' : '#888884',
+                          fontFamily: 'var(--font-body)',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                          transition: 'all 0.15s',
+                        }}
+                        onMouseEnter={e => {
+                          if (!isActive) {
+                            e.currentTarget.style.borderColor = 'rgba(245,166,35,0.3)';
+                            e.currentTarget.style.color = '#F5F5F0';
+                          }
+                        }}
+                        onMouseLeave={e => {
+                          if (!isActive) {
+                            e.currentTarget.style.borderColor = '#2A2A2A';
+                            e.currentTarget.style.color = '#888884';
+                          }
+                        }}
+                      >
+                        {to12hr(slot)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
 
               {/* RIGHT — Day off toggle */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: 'auto' }}>
                 <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884', whiteSpace: 'nowrap' }}>Day off</span>
-                <ToggleSwitch on={!!day?.dayOff} onClick={() => handleToggle(dayIndex, 'dayOff')} />
+                <ToggleSwitch on={!!day?.dayOff} onClick={() => toggleDayOff(dayIndex)} />
               </div>
             </div>
           );
@@ -248,13 +288,10 @@ export default function AvailabilityPage() {
       </div>
 
       {/* ── LEGEND ── */}
-      <div style={{ display: 'flex', gap: '16px', marginTop: '20px', flexWrap: 'wrap' }}>
-        {[{ color: '#F5A623', label: 'Morning' }, { color: '#60A5FA', label: 'Afternoon' }, { color: '#4CAF7D', label: 'Evening' }].map(({ color, label }) => (
-          <span key={label} style={{ display: 'flex', alignItems: 'center', gap: '5px', fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884' }}>
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: color, display: 'inline-block', flexShrink: 0 }} />
-            {label}
-          </span>
-        ))}
+      <div style={{ marginTop: '20px' }}>
+        <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884' }}>
+          Tap a time slot to mark yourself available. Changes save instantly.
+        </span>
       </div>
     </div>
   );
