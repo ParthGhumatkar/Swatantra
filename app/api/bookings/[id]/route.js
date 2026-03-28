@@ -16,8 +16,10 @@ export async function PATCH(request, { params }) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
+    await sql`ALTER TABLE booking_requests ADD COLUMN IF NOT EXISTS decline_reason TEXT`;
+
     const { id } = await params;
-    const { status } = await request.json();
+    const { status, declineReason } = await request.json();
 
     if (!status || !['done', 'declined', 'pending'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
@@ -25,7 +27,7 @@ export async function PATCH(request, { params }) {
 
     const result = await sql`
       UPDATE booking_requests
-      SET status = ${status}
+      SET status = ${status}, decline_reason = ${declineReason ?? null}
       WHERE id = ${id} AND provider_id = ${payload.provider_id}
       RETURNING id, customer_name, customer_mobile, message, status, created_at
     `;

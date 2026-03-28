@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Eye, MapPin, Phone, MessageCircle, Star, CalendarPlus, Loader2, CheckCircle2 } from 'lucide-react';
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -19,7 +19,10 @@ function getInitials(name) {
 }
 
 export default function PublicProfileClient({ provider, availability }) {
-  const [form, setForm] = useState({ customer_name: '', customer_mobile: '', message: '' });
+  const [form, setForm] = useState({ customer_name: '', customer_mobile: '', preferred_time: '', message: '' });
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [slotFromClick, setSlotFromClick] = useState(false);
+  const hasScrolled = useRef(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -95,6 +98,19 @@ export default function PublicProfileClient({ provider, availability }) {
     transform: visible ? 'translateY(0)' : 'translateY(12px)',
     transition: `opacity 0.35s ease ${delay}s, transform 0.35s ease ${delay}s`,
   });
+
+  const handleSlotClick = (t) => {
+    const display = to12hr(t);
+    setSelectedSlot(display);
+    setSlotFromClick(true);
+    setForm(f => ({ ...f, preferred_time: display }));
+    if (!hasScrolled.current) {
+      hasScrolled.current = true;
+      setTimeout(() => {
+        document.getElementById('booking-form')?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    }
+  };
 
   return (
     <>
@@ -235,9 +251,24 @@ export default function PublicProfileClient({ provider, availability }) {
                               <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#888884', marginBottom: '6px' }}>Morning</div>
                               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                 {d.morningSlots.map(t => (
-                                  <span key={t} style={{ border: '1px solid rgba(245,166,35,0.35)', color: '#F5A623', background: 'rgba(245,166,35,0.06)', borderRadius: '9999px', padding: '5px 10px', fontFamily: 'var(--font-body)', fontSize: '11px' }}>
+                                  <button
+                                    key={t}
+                                    onClick={() => handleSlotClick(t)}
+                                    style={{
+                                      border: selectedSlot === to12hr(t) ? '2px solid #F5A623' : '1px solid rgba(245,166,35,0.35)',
+                                      color: '#F5A623',
+                                      background: selectedSlot === to12hr(t) ? 'rgba(245,166,35,0.18)' : 'rgba(245,166,35,0.06)',
+                                      borderRadius: '9999px',
+                                      padding: selectedSlot === to12hr(t) ? '4px 9px' : '5px 10px',
+                                      fontFamily: 'var(--font-body)',
+                                      fontSize: '11px',
+                                      cursor: 'pointer',
+                                      boxShadow: selectedSlot === to12hr(t) ? '0 0 0 3px rgba(245,166,35,0.15)' : 'none',
+                                      transition: 'all 0.15s',
+                                    }}
+                                  >
                                     {to12hr(t)}
-                                  </span>
+                                  </button>
                                 ))}
                               </div>
                             </div>
@@ -248,9 +279,24 @@ export default function PublicProfileClient({ provider, availability }) {
                               <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#888884', marginBottom: '6px' }}>Afternoon</div>
                               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                 {d.afternoonSlots.map(t => (
-                                  <span key={t} style={{ border: '1px solid rgba(245,166,35,0.35)', color: '#F5A623', background: 'rgba(245,166,35,0.06)', borderRadius: '9999px', padding: '5px 10px', fontFamily: 'var(--font-body)', fontSize: '11px' }}>
+                                  <button
+                                    key={t}
+                                    onClick={() => handleSlotClick(t)}
+                                    style={{
+                                      border: selectedSlot === to12hr(t) ? '2px solid #F5A623' : '1px solid rgba(245,166,35,0.35)',
+                                      color: '#F5A623',
+                                      background: selectedSlot === to12hr(t) ? 'rgba(245,166,35,0.18)' : 'rgba(245,166,35,0.06)',
+                                      borderRadius: '9999px',
+                                      padding: selectedSlot === to12hr(t) ? '4px 9px' : '5px 10px',
+                                      fontFamily: 'var(--font-body)',
+                                      fontSize: '11px',
+                                      cursor: 'pointer',
+                                      boxShadow: selectedSlot === to12hr(t) ? '0 0 0 3px rgba(245,166,35,0.15)' : 'none',
+                                      transition: 'all 0.15s',
+                                    }}
+                                  >
                                     {to12hr(t)}
-                                  </span>
+                                  </button>
                                 ))}
                               </div>
                             </div>
@@ -261,9 +307,24 @@ export default function PublicProfileClient({ provider, availability }) {
                               <div style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#888884', marginBottom: '6px' }}>Evening</div>
                               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                                 {d.eveningSlots.map(t => (
-                                  <span key={t} style={{ border: '1px solid rgba(245,166,35,0.35)', color: '#F5A623', background: 'rgba(245,166,35,0.06)', borderRadius: '9999px', padding: '5px 10px', fontFamily: 'var(--font-body)', fontSize: '11px' }}>
+                                  <button
+                                    key={t}
+                                    onClick={() => handleSlotClick(t)}
+                                    style={{
+                                      border: selectedSlot === to12hr(t) ? '2px solid #F5A623' : '1px solid rgba(245,166,35,0.35)',
+                                      color: '#F5A623',
+                                      background: selectedSlot === to12hr(t) ? 'rgba(245,166,35,0.18)' : 'rgba(245,166,35,0.06)',
+                                      borderRadius: '9999px',
+                                      padding: selectedSlot === to12hr(t) ? '4px 9px' : '5px 10px',
+                                      fontFamily: 'var(--font-body)',
+                                      fontSize: '11px',
+                                      cursor: 'pointer',
+                                      boxShadow: selectedSlot === to12hr(t) ? '0 0 0 3px rgba(245,166,35,0.15)' : 'none',
+                                      transition: 'all 0.15s',
+                                    }}
+                                  >
                                     {to12hr(t)}
-                                  </span>
+                                  </button>
                                 ))}
                               </div>
                             </div>
@@ -295,7 +356,7 @@ export default function PublicProfileClient({ provider, availability }) {
           )}
 
           {/* ── BOOKING FORM ── */}
-          <div style={{ ...fadeIn(0.24), background: '#141414', border: '1px solid #222222', borderRadius: '20px', padding: '18px', marginBottom: '12px' }}>
+          <div id="booking-form" style={{ ...fadeIn(0.24), background: '#141414', border: '1px solid #222222', borderRadius: '20px', padding: '18px', marginBottom: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
               <CalendarPlus size={16} style={{ color: '#F5A623' }} />
               <span style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: '#F5F5F0' }}>Request a Booking</span>
@@ -343,6 +404,24 @@ export default function PublicProfileClient({ provider, availability }) {
                     onFocus={e => { e.target.style.borderColor = 'rgba(245,166,35,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(245,166,35,0.08)'; }}
                     onBlur={e => { e.target.style.borderColor = '#2A2A2A'; e.target.style.boxShadow = 'none'; }}
                   />
+                  <input
+                    type="text"
+                    placeholder="Preferred time (optional)"
+                    value={form.preferred_time}
+                    onChange={e => {
+                      setForm(f => ({ ...f, preferred_time: e.target.value }));
+                      setSlotFromClick(false);
+                      setSelectedSlot(null);
+                    }}
+                    style={{ ...inputStyle, marginBottom: slotFromClick ? '4px' : '8px', border: slotFromClick ? '1px solid #F5A623' : '1px solid #2A2A2A', boxShadow: slotFromClick ? '0 0 0 3px rgba(245,166,35,0.08)' : 'none' }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(245,166,35,0.5)'; e.target.style.boxShadow = '0 0 0 3px rgba(245,166,35,0.08)'; }}
+                    onBlur={e => { e.target.style.borderColor = slotFromClick ? '#F5A623' : '#2A2A2A'; e.target.style.boxShadow = slotFromClick ? '0 0 0 3px rgba(245,166,35,0.08)' : 'none'; }}
+                  />
+                  {slotFromClick && (
+                    <p style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#F5A623', margin: '0 0 8px 2px', opacity: 0.8 }}>
+                      Selected from schedule · tap a time above to change
+                    </p>
+                  )}
                   <button
                     type="submit"
                     disabled={submitting}

@@ -35,6 +35,121 @@ function StatusBadge({ status }) {
   );
 }
 
+const DECLINE_REASONS = [
+  "I'm fully booked on that day",
+  "I don't cover that area",
+  "Request outside my service scope",
+  "Scheduling conflict",
+  "Other (specify below)",
+];
+
+function DeclineModal({ booking, providerName, onClose, onSuccess }) {
+  const [reason, setReason] = useState('');
+  const [custom, setCustom] = useState('');
+  const [declining, setDeclining] = useState(false);
+  const isOther = reason === 'Other (specify below)';
+  const finalReason = isOther ? custom.trim() : reason;
+  const canSubmit = !declining && (isOther ? custom.trim().length > 0 : reason.length > 0);
+
+  const handleDecline = async () => {
+    if (!canSubmit) return;
+    setDeclining(true);
+    try {
+      const res = await fetch(`/api/bookings/${booking.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'declined', declineReason: finalReason }),
+      });
+      if (!res.ok) throw new Error('Failed');
+      const customerMessage = `Hi ${booking.customer_name}, this is ${providerName} from Swatantra.\n\nI've reviewed your booking request and unfortunately I'm unable to take it up at this time.\n\nReason: ${finalReason}\n\nYou can find and connect with other verified service providers at:\nswatantra.vercel.app\n\nSorry for the inconvenience, and thank you for reaching out!`;
+      const raw = (booking.customer_mobile || '').replace(/\D/g, '');
+      const fullPhone = raw.startsWith('91') ? raw : `91${raw}`;
+      window.open(`https://wa.me/${fullPhone}?text=${encodeURIComponent(customerMessage)}`, '_blank');
+      onSuccess(booking.id);
+    } catch (e) {
+      console.error('Decline error:', e);
+    } finally {
+      setDeclining(false);
+    }
+  };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{ background: '#111111', border: '1px solid #2a2a2a', borderRadius: '16px', padding: '24px', width: '100%', maxWidth: '420px', boxShadow: '0 24px 64px rgba(0,0,0,0.6)', display: 'flex', flexDirection: 'column', gap: '14px' }}
+      >
+        <div>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '16px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>Decline Request</p>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884', margin: '4px 0 0' }}>
+            {booking.customer_name || 'Customer'} &middot; {booking.customer_mobile}
+          </p>
+        </div>
+
+        <div>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#888884', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Reason for declining</p>
+          <div style={{ position: 'relative' }}>
+            <select
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              style={{ width: '100%', background: '#0F0F0F', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '10px 36px 10px 12px', color: reason ? '#F5F5F0' : '#555', fontFamily: 'var(--font-body)', fontSize: '13px', outline: 'none', cursor: 'pointer', appearance: 'none', WebkitAppearance: 'none', boxSizing: 'border-box' }}
+            >
+              <option value="" disabled>Select a reason...</option>
+              {DECLINE_REASONS.map(r => (
+                <option key={r} value={r} style={{ color: '#F5F5F0', background: '#111' }}>{r}</option>
+              ))}
+            </select>
+            <svg style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 4l4 4 4-4" stroke="#888884" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
+
+        <div style={{ maxHeight: isOther ? '120px' : '0', overflow: 'hidden', transition: 'max-height 0.2s ease' }}>
+          <textarea
+            rows={3}
+            placeholder="Type your reason here..."
+            value={custom}
+            onChange={e => setCustom(e.target.value)}
+            style={{ background: '#0F0F0F', border: '1px solid #2A2A2A', borderRadius: '10px', padding: '10px 12px', color: '#F5F5F0', fontFamily: 'var(--font-body)', fontSize: '13px', width: '100%', outline: 'none', resize: 'none', boxSizing: 'border-box', display: 'block' }}
+            onFocus={e => { e.target.style.borderColor = 'rgba(245,166,35,0.5)'; }}
+            onBlur={e => { e.target.style.borderColor = '#2A2A2A'; }}
+          />
+        </div>
+
+        <button
+          onClick={handleDecline}
+          disabled={!canSubmit}
+          style={{ background: canSubmit ? '#DC2626' : '#2A2A2A', color: canSubmit ? '#fff' : '#555', borderRadius: '12px', padding: '12px', border: 'none', fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, width: '100%', cursor: canSubmit ? 'pointer' : 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'background 0.15s' }}
+        >
+          {declining && <Loader2 size={14} className="animate-spin" />}
+          Send & Decline
+        </button>
+        <button
+          onClick={onClose}
+          style={{ background: 'transparent', color: '#888884', borderRadius: '12px', padding: '11px', border: '1px solid #2A2A2A', fontFamily: 'var(--font-display)', fontSize: '13px', width: '100%', cursor: 'pointer', transition: 'all 0.15s' }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#F5F5F0'; e.currentTarget.style.borderColor = '#444440'; }}
+          onMouseLeave={e => { e.currentTarget.style.color = '#888884'; e.currentTarget.style.borderColor = '#2A2A2A'; }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Toast({ message, visible }) {
+  return (
+    <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 200, background: '#1A1A1A', border: '1px solid rgba(76,175,125,0.3)', borderRadius: '14px', padding: '12px 16px', fontFamily: 'var(--font-body)', fontSize: '13px', color: '#F5F5F0', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', opacity: visible ? 1 : 0, transform: visible ? 'translateX(0)' : 'translateX(110%)', transition: visible ? 'opacity 0.25s ease, transform 0.25s ease' : 'opacity 0.2s ease, transform 0.2s ease', pointerEvents: 'none' }}>
+      <CheckCircle2 size={16} style={{ color: '#4CAF7D', flexShrink: 0 }} />
+      {message}
+    </div>
+  );
+}
+
 export default function RequestsPage() {
   const [bookings, setBookings] = useState([]);
   const [total, setTotal] = useState(0);
@@ -45,6 +160,9 @@ export default function RequestsPage() {
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
   const LIMIT = 10;
+  const [provider, setProvider] = useState(null);
+  const [declineModal, setDeclineModal] = useState({ open: false, booking: null });
+  const [toast, setToast] = useState('');
 
   const fetchBookings = async (status, off = 0, append = false) => {
     try {
@@ -72,6 +190,13 @@ export default function RequestsPage() {
     fetchBookings(tab, 0);
   }, [tab]);
 
+  useEffect(() => {
+    fetch('/api/provider')
+      .then(r => r.json())
+      .then(d => { if (d.provider) setProvider(d.provider); })
+      .catch(() => {});
+  }, []);
+
   const updateStatus = async (id, status) => {
     setUpdating(id);
     try {
@@ -91,6 +216,14 @@ export default function RequestsPage() {
     } finally {
       setUpdating(null);
     }
+  };
+
+  const handleDeclineSuccess = (bookingId) => {
+    setDeclineModal({ open: false, booking: null });
+    setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: 'declined' } : b));
+    setPendingCount(prev => Math.max(0, prev - 1));
+    setToast('Request declined · WhatsApp opened');
+    setTimeout(() => setToast(''), 3000);
   };
 
   const copyLink = () => {
@@ -195,7 +328,7 @@ export default function RequestsPage() {
                     Mark as Done
                   </button>
                   <button
-                    onClick={() => updateStatus(b.id, 'declined')}
+                    onClick={() => setDeclineModal({ open: true, booking: b })}
                     disabled={updating === b.id}
                     className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-150 active:scale-95"
                     style={{ border: '1px solid rgba(255,107,107,0.3)', color: 'var(--danger)', background: 'transparent' }}
@@ -242,6 +375,16 @@ export default function RequestsPage() {
           </p>
         </div>
       )}
+
+      {declineModal.open && declineModal.booking && (
+        <DeclineModal
+          booking={declineModal.booking}
+          providerName={provider?.name || 'Your provider'}
+          onClose={() => setDeclineModal({ open: false, booking: null })}
+          onSuccess={handleDeclineSuccess}
+        />
+      )}
+      <Toast message={toast} visible={!!toast} />
     </div>
   );
 }
