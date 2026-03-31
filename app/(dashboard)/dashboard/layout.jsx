@@ -4,7 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import sql from '@/lib/db';
 import Sidebar from '@/components/dashboard/Sidebar';
 import MobileNav from '@/components/dashboard/MobileNav';
-import { LanguageProvider } from '@/lib/i18n/LanguageContext';
+import LanguageWrapper from './LanguageWrapper';
 import LangPromptBanner from '@/components/dashboard/LangPromptBanner';
 
 export default async function DashboardLayout({ children }) {
@@ -53,7 +53,7 @@ export default async function DashboardLayout({ children }) {
   const s = subscription ? JSON.parse(JSON.stringify(subscription)) : null;
 
   return (
-    <LanguageProvider initialLang={provider.language ?? 'hi'}>
+    <LanguageWrapper initialLang={provider.language ?? 'hi'}>
       <div className="grain-overlay" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
         <Sidebar provider={p} pendingCount={pendingCount} subscription={s} />
         <main className="md:ml-[240px] min-h-screen">
@@ -64,6 +64,6 @@ export default async function DashboardLayout({ children }) {
         <MobileNav pendingCount={pendingCount} />
         <LangPromptBanner />
       </div>
-    </LanguageProvider>
+    </LanguageWrapper>
   );
 }
