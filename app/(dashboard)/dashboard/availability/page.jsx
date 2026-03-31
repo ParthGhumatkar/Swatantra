@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Loader2, CheckCircle2 } from 'lucide-react';
-
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const DEFAULT_DAY = { dayOff: true, timeSlots: [] };
@@ -38,6 +37,7 @@ function ToggleSwitch({ on, onClick }) {
 }
 
 export default function AvailabilityPage() {
+  const { t } = useLanguage();
   const [availability, setAvailability] = useState(DEFAULT_AVAIL);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null);
@@ -135,14 +135,14 @@ export default function AvailabilityPage() {
     <div className="fade-in-1">
 
       {/* ── HEADER ── */}
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>Weekly Schedule</h1>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>{t.availability.weekly_schedule}</h1>
       <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#888884', marginTop: '4px', marginBottom: 0 }}>
         Set your recurring availability. Customers will see when you&apos;re free.
       </p>
 
       {/* ── TOP ROW ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
-        <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: '#888884' }}>Your weekly availability</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: '#888884' }}>{t.availability.your_weekly}</span>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
             onClick={setAllWeekdays}
@@ -150,7 +150,7 @@ export default function AvailabilityPage() {
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(245,166,35,0.4)'; e.currentTarget.style.background = 'rgba(245,166,35,0.05)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.background = 'transparent'; }}
           >
-            All weekdays on
+            {t.availability.all_weekdays}
           </button>
           <button
             onClick={clearAll}
@@ -158,7 +158,7 @@ export default function AvailabilityPage() {
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,107,107,0.3)'; e.currentTarget.style.color = '#FF6B6B'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.color = '#888884'; }}
           >
-            Clear all
+            {t.availability.clear_all}
           </button>
         </div>
       </div>
@@ -217,7 +217,7 @@ export default function AvailabilityPage() {
               {/* LEFT — Day name + save indicator */}
               <div style={{ minWidth: '110px', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: '#F5F5F0' }}>{DAY_NAMES[dayIndex]}</span>
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: '#F5F5F0' }}>{t.availability.days[dayIndex]}</span>
                   {isToday && (
                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '10px', color: '#000', background: '#F5A623', borderRadius: '20px', padding: '1px 7px', fontWeight: 700, flexShrink: 0 }}>Today</span>
                   )}
@@ -225,13 +225,13 @@ export default function AvailabilityPage() {
                 {isSaving && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginTop: '3px' }}>
                     <Loader2 size={11} className="animate-spin" style={{ color: '#888884' }} />
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#888884' }}>Saving…</span>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#888884' }}>{t.availability.saving}</span>
                   </div>
                 )}
                 {isSaved && !isSaving && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '3px', marginTop: '3px' }}>
                     <CheckCircle2 size={11} style={{ color: '#4CAF7D' }} />
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#4CAF7D' }}>Saved</span>
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', color: '#4CAF7D' }}>{t.availability.just_saved}</span>
                   </div>
                 )}
               </div>
@@ -279,7 +279,7 @@ export default function AvailabilityPage() {
 
               {/* RIGHT — Day off toggle */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, marginLeft: 'auto' }}>
-                <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884', whiteSpace: 'nowrap' }}>Day off</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884', whiteSpace: 'nowrap' }}>{t.availability.day_off}</span>
                 <ToggleSwitch on={!!day?.dayOff} onClick={() => toggleDayOff(dayIndex)} />
               </div>
             </div>
@@ -290,7 +290,7 @@ export default function AvailabilityPage() {
       {/* ── LEGEND ── */}
       <div style={{ marginTop: '20px' }}>
         <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884' }}>
-          Tap a time slot to mark yourself available. Changes save instantly.
+          {t.availability.tap_hint}
         </span>
       </div>
     </div>

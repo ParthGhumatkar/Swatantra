@@ -4,8 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Bell, CalendarDays, UserCircle, Copy, CheckCheck, CheckCircle2, MessageCircle, Eye, QrCode, Clipboard, Moon, X, Download } from 'lucide-react';
 import { QRCodeSVG, QRCodeCanvas } from 'qrcode.react';
-
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function useCountUp(target, duration = 600) {
   const [count, setCount] = useState(0);
@@ -23,11 +22,11 @@ function useCountUp(target, duration = 600) {
   return count;
 }
 
-function getGreeting() {
+function getGreeting(t) {
   const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (h < 12) return t.dashboard.good_morning;
+  if (h < 17) return t.dashboard.good_afternoon;
+  return t.dashboard.good_evening;
 }
 
 function getInitials(name) {
@@ -104,6 +103,7 @@ function Toast({ message, visible }) {
 }
 
 export default function DashboardHome() {
+  const { t } = useLanguage();
   const [provider, setProvider] = useState(null);
   const [subscription, setSubscription] = useState(null);
   const [bookings, setBookings] = useState([]);
@@ -200,9 +200,9 @@ export default function DashboardHome() {
   const today = new Date().getDay();
   const todayAvail = availability[today] || { morning: false, afternoon: false, evening: false, dayOff: false };
   const slots = todayAvail ? [
-    { label: 'Morning', on: todayAvail.morning },
-    { label: 'Afternoon', on: todayAvail.afternoon },
-    { label: 'Evening', on: todayAvail.evening },
+    { label: t.availability.morning, on: todayAvail.morning },
+    { label: t.availability.afternoon, on: todayAvail.afternoon },
+    { label: t.availability.evening, on: todayAvail.evening },
   ] : [];
   const allOff = slots.length === 0 || slots.every(s => !s.on);
 
@@ -234,7 +234,7 @@ export default function DashboardHome() {
         <div style={{ position: 'absolute', right: '-40px', top: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,166,35,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>
-            {getGreeting()}, {provider.name?.split(' ')[0]} 👋
+            {getGreeting(t)}, {provider.name?.split(' ')[0]} 👋
           </h1>
           <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: '#888884', margin: '4px 0 0' }}>
             {[provider.service, provider.city].filter(Boolean).join(' · ') || 'Service Provider'}
@@ -272,7 +272,7 @@ export default function DashboardHome() {
         className="fade-in-2"
         style={{ background: '#141414', borderRadius: '20px', border: '1px solid #2A2A2A', borderLeft: '3px solid #F5A623', padding: '20px 24px', marginBottom: '16px' }}
       >
-        <p style={{ fontFamily: 'var(--font-display)', fontSize: '10px', color: '#F5A623', textTransform: 'uppercase', letterSpacing: '0.15em', margin: '0 0 12px 0' }}>YOUR BOOKING LINK</p>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '10px', color: '#F5A623', textTransform: 'uppercase', letterSpacing: '0.15em', margin: '0 0 12px 0' }}>{t.dashboard.booking_link}</p>
         <div style={{ background: '#0A0A0A', border: '1px solid #222', borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
           <div style={{ overflow: 'hidden', flex: 1, whiteSpace: 'nowrap' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', color: '#888884' }}>{displayDomain}</span>
@@ -293,7 +293,7 @@ export default function DashboardHome() {
             style={{ display: 'flex', alignItems: 'center', gap: '6px', background: copied ? '#4CAF7D' : '#F5A623', color: '#000', borderRadius: '10px', padding: '10px 20px', border: 'none', fontFamily: 'var(--font-display)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
           >
             {copied ? <CheckCheck size={14} /> : <Clipboard size={14} />}
-            {copied ? 'Copied!' : 'Copy Link'}
+            {copied ? t.dashboard.link_copied : t.dashboard.copy_link}
           </button>
           <button
             onClick={shareWhatsApp}
@@ -302,7 +302,7 @@ export default function DashboardHome() {
             onMouseLeave={e => { e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.background = 'transparent'; }}
           >
             <MessageCircle size={14} />
-            Share on WhatsApp
+            {t.dashboard.share_whatsapp}
           </button>
           <button
             onClick={() => setQrOpen(true)}
@@ -311,7 +311,7 @@ export default function DashboardHome() {
             onMouseLeave={e => { e.currentTarget.style.color = '#888884'; e.currentTarget.style.borderColor = '#1E1E1E'; }}
           >
             <QrCode size={14} />
-            QR Code
+            {t.dashboard.qr_code}
           </button>
         </div>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '11px', color: '#444440', margin: 0 }}>Share your link with customers. They can book you without any app.</p>
@@ -328,7 +328,7 @@ export default function DashboardHome() {
           onMouseLeave={e => { e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.transform = 'translateY(0)'; }}
         >
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884' }}>Pending Requests</span>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884' }}>{t.dashboard.pending_requests}</span>
             <Bell size={16} style={{ color: '#888884', flexShrink: 0 }} />
           </div>
           {pendingCount > 0 ? (
@@ -354,17 +354,17 @@ export default function DashboardHome() {
           onMouseLeave={e => { e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.transform = 'translateY(0)'; }}
         >
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884' }}>Today&apos;s Schedule</span>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884' }}>{t.dashboard.todays_schedule}</span>
             <CalendarDays size={16} style={{ color: '#888884', flexShrink: 0 }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>{DAY_NAMES[today]}</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>{t.availability.days[today]}</p>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '10px', color: '#000', background: '#F5A623', borderRadius: '20px', padding: '1px 8px', fontWeight: 700 }}>Today</span>
           </div>
           {allOff ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
               <Moon size={22} style={{ color: '#888884' }} />
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: '#888884' }}>Day off</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: '#888884' }}>{t.dashboard.day_off}</span>
             </div>
           ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
@@ -390,7 +390,7 @@ export default function DashboardHome() {
           onMouseLeave={e => { e.currentTarget.style.borderColor = '#2A2A2A'; e.currentTarget.style.transform = 'translateY(0)'; }}
         >
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
-            <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884' }}>Profile</span>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '12px', color: '#888884' }}>{t.dashboard.profile}</span>
             <UserCircle size={16} style={{ color: '#888884', flexShrink: 0 }} />
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '12px', position: 'relative', width: '72px', margin: '12px auto 0' }}>
@@ -411,7 +411,7 @@ export default function DashboardHome() {
       {/* ── SECTION 4: RECENT REQUESTS ── */}
       <div className="fade-in-4" style={{ background: '#141414', border: '1px solid #2A2A2A', borderRadius: '20px', padding: '20px 24px', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>Recent Requests</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>{t.dashboard.recent_requests}</h2>
           {totalCount > 0 && (
             <Link
               href="/dashboard/requests"
@@ -419,7 +419,7 @@ export default function DashboardHome() {
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.7'; }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '1'; }}
             >
-              View all →
+              {t.dashboard.view_all} →
             </Link>
           )}
         </div>
@@ -461,7 +461,7 @@ export default function DashboardHome() {
               <path d="M8 28h12l4 6h16l4-6h12" stroke="#F5A623" strokeWidth="1.5" opacity="0.4"/>
               <path d="M20 22h24M20 28h12" stroke="#F5A623" strokeWidth="1.5" opacity="0.3" strokeLinecap="round"/>
             </svg>
-            <p style={{ fontFamily: 'var(--font-display)', fontSize: '15px', color: '#F5F5F0', margin: '16px 0 4px' }}>No booking requests yet</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '15px', color: '#F5F5F0', margin: '16px 0 4px' }}>{t.dashboard.no_bookings_yet}</p>
             <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: '#888884', margin: '0 0 16px' }}>Share your link with customers to start receiving bookings</p>
             <button
               onClick={copyLink}

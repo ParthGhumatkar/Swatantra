@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Camera, Check, Loader2, AlertCircle } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 const INPUT_STYLE = {
   background: 'var(--surface-2)',
@@ -23,6 +24,7 @@ function getInitials(name) {
 }
 
 export default function ProfilePage() {
+  const { t } = useLanguage();
   const [provider, setProvider] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -110,11 +112,11 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>Edit Profile</h1>
-          <p className="font-body text-[13px]" style={{ color: 'var(--text-secondary)' }}>Changes save automatically</p>
+          <h1 className="font-display text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>{t.profile.edit_title}</h1>
+          <p className="font-body text-[13px]" style={{ color: 'var(--text-secondary)' }}>{t.profile.changes_autosave}</p>
         </div>
         <div className="font-body text-[13px]">
-          {saving && <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}><Loader2 size={14} className="animate-spin" /> Saving...</span>}
+          {saving && <span className="flex items-center gap-1" style={{ color: 'var(--text-secondary)' }}><Loader2 size={14} className="animate-spin" /> {t.profile.saving}</span>}
           {saved && <span className="flex items-center gap-1" style={{ color: 'var(--mint)' }}><Check size={14} /> Saved ✓</span>}
           {saveError && <span className="flex items-center gap-1" style={{ color: 'var(--danger)' }}><AlertCircle size={14} /> {saveError}</span>}
         </div>
@@ -155,7 +157,7 @@ export default function ProfilePage() {
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(245,166,35,0.5)'; e.currentTarget.style.background = 'var(--accent-dim)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.background = 'transparent'; }}
           >
-            <Camera size={16} /> Change Photo
+            <Camera size={16} /> {t.profile.change_photo}
           </button>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhoto} />
           <p className="font-mono text-[12px] mt-4" style={{ color: 'var(--text-secondary)' }}>
@@ -168,7 +170,7 @@ export default function ProfilePage() {
           <div className="rounded-2xl p-6 space-y-5" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
             {/* Name */}
             <div>
-              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>Full Name</label>
+              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t.profile.name}</label>
               <input
                 type="text"
                 value={provider.name || ''}
@@ -182,7 +184,7 @@ export default function ProfilePage() {
 
             {/* Service */}
             <div>
-              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>Service Type</label>
+              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t.profile.service_type}</label>
               <input
                 type="text"
                 value={provider.service || ''}
@@ -196,7 +198,7 @@ export default function ProfilePage() {
 
             {/* City */}
             <div>
-              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>City / Area</label>
+              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t.profile.city_area}</label>
               <input
                 type="text"
                 value={provider.city || ''}
@@ -210,7 +212,7 @@ export default function ProfilePage() {
 
             {/* Description */}
             <div>
-              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>About You</label>
+              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t.profile.about}</label>
               <textarea
                 rows={4}
                 value={provider.description || ''}
@@ -228,7 +230,7 @@ export default function ProfilePage() {
 
             {/* Experience */}
             <div>
-              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>Years of Experience</label>
+              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t.profile.experience}</label>
               <input
                 type="number"
                 min={0}
@@ -243,7 +245,7 @@ export default function ProfilePage() {
 
             {/* Language */}
             <div>
-              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>Language Preference</label>
+              <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t.settings.language}</label>
               <select
                 value={provider.language || 'en'}
                 onChange={e => updateField('language', e.target.value)}

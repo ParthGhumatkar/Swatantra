@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Check, Loader2, AlertCircle, LogOut } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 const INPUT_STYLE = {
   background: 'var(--surface-2)',
@@ -17,6 +18,7 @@ const INPUT_STYLE = {
 };
 
 export default function SettingsPage() {
+  const { lang, t, changeLang } = useLanguage();
   const [provider, setProvider] = useState(null);
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -39,15 +41,16 @@ export default function SettingsPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const updateLanguage = async (lang) => {
-    setProvider(prev => ({ ...prev, language: lang }));
+  const updateLanguage = async (newLang) => {
+    changeLang(newLang);
+    setProvider(prev => ({ ...prev, language: newLang }));
     setLangSaving(true);
     setLangSaved(false);
     try {
       await fetch('/api/provider', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ language: lang }),
+        body: JSON.stringify({ language: newLang }),
       });
       setLangSaved(true);
       setTimeout(() => setLangSaved(false), 2000);
@@ -113,18 +116,18 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8 fade-in-1" style={{ maxWidth: '640px' }}>
-      <h1 className="font-display text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>Settings</h1>
+      <h1 className="font-display text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>{t.settings.title}</h1>
 
       {/* Language */}
       <div className="rounded-2xl p-6" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-[16px] font-semibold" style={{ color: 'var(--text-primary)' }}>Interface Language</h2>
-          {langSaving && <span className="flex items-center gap-1 text-[12px] font-body" style={{ color: 'var(--text-secondary)' }}><Loader2 size={12} className="animate-spin" /> Saving</span>}
-          {langSaved && <span className="flex items-center gap-1 text-[12px] font-body" style={{ color: 'var(--mint)' }}><Check size={12} /> Saved ✓</span>}
+          <h2 className="font-display text-[16px] font-semibold" style={{ color: 'var(--text-primary)' }}>{t.settings.interface_language}</h2>
+          {langSaving && <span className="flex items-center gap-1 text-[12px] font-body" style={{ color: 'var(--text-secondary)' }}><Loader2 size={12} className="animate-spin" /> {t.settings.saving}</span>}
+          {langSaved && <span className="flex items-center gap-1 text-[12px] font-body" style={{ color: 'var(--mint)' }}><Check size={12} /> {t.settings.saved}</span>}
         </div>
         <div className="flex flex-wrap gap-3" style={{ maxWidth: '480px' }}>
           {langs.map(l => {
-            const active = provider?.language === l.code;
+            const active = lang === l.code;
             return (
               <button
                 key={l.code}
@@ -149,7 +152,7 @@ export default function SettingsPage() {
 
       {/* Change PIN */}
       <div className="rounded-2xl p-6" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-        <h2 className="font-display text-[16px] font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Change PIN</h2>
+        <h2 className="font-display text-[16px] font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>{t.settings.change_pin}</h2>
 
         {pinMsg.text && (
           <div
@@ -167,7 +170,7 @@ export default function SettingsPage() {
 
         <form onSubmit={changePin} className="space-y-4">
           <div>
-            <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>Current PIN</label>
+            <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t.settings.current_pin}</label>
             <input
               type="password"
               maxLength={6}
@@ -180,7 +183,7 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>New PIN</label>
+            <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t.settings.new_pin}</label>
             <input
               type="password"
               minLength={4}
@@ -194,7 +197,7 @@ export default function SettingsPage() {
             />
           </div>
           <div>
-            <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>Confirm New PIN</label>
+            <label className="block font-body text-[12px] uppercase tracking-wider mb-1.5" style={{ color: 'var(--text-secondary)' }}>{t.settings.confirm_pin}</label>
             <input
               type="password"
               minLength={4}
@@ -214,14 +217,14 @@ export default function SettingsPage() {
             style={{ background: 'var(--accent)', color: '#000' }}
           >
             {pinLoading ? <Loader2 size={14} className="animate-spin" /> : null}
-            Update PIN
+            {t.settings.update_pin}
           </button>
         </form>
       </div>
 
       {/* Subscription */}
       <div className="rounded-2xl p-6" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-        <h2 className="font-display text-[16px] font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Your Plan</h2>
+        <h2 className="font-display text-[16px] font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>{t.settings.your_plan}</h2>
         <div className="rounded-xl p-4" style={{ background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
           {subscription?.status === 'active' ? (
             <div>
@@ -256,7 +259,7 @@ export default function SettingsPage() {
 
       {/* Danger zone */}
       <div className="rounded-2xl p-6" style={{ background: 'var(--surface)', border: '1px solid rgba(255,107,107,0.3)' }}>
-        <h2 className="font-display text-[16px] font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Account</h2>
+        <h2 className="font-display text-[16px] font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>{t.settings.account}</h2>
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-150 active:scale-95"
@@ -265,7 +268,7 @@ export default function SettingsPage() {
           onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,107,107,0.1)'; }}
         >
           <LogOut size={16} />
-          Logout from all devices
+          {t.settings.logout}
         </button>
       </div>
     </div>

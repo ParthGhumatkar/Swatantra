@@ -4,6 +4,8 @@ import { verifyToken } from '@/lib/auth';
 import sql from '@/lib/db';
 import Sidebar from '@/components/dashboard/Sidebar';
 import MobileNav from '@/components/dashboard/MobileNav';
+import { LanguageProvider } from '@/lib/i18n/LanguageContext';
+import LangPromptBanner from '@/components/dashboard/LangPromptBanner';
 
 export default async function DashboardLayout({ children }) {
   const cookieStore = await cookies();
@@ -51,14 +53,17 @@ export default async function DashboardLayout({ children }) {
   const s = subscription ? JSON.parse(JSON.stringify(subscription)) : null;
 
   return (
-    <div className="grain-overlay" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
-      <Sidebar provider={p} pendingCount={pendingCount} subscription={s} />
-      <main className="md:ml-[240px] min-h-screen">
-        <div className="mx-auto px-4 md:px-6 pt-6 md:pt-8 pb-24 md:pb-12" style={{ maxWidth: '960px' }}>
-          {children}
-        </div>
-      </main>
-      <MobileNav pendingCount={pendingCount} />
-    </div>
+    <LanguageProvider initialLang={provider.language ?? 'hi'}>
+      <div className="grain-overlay" style={{ background: 'var(--bg)', minHeight: '100vh' }}>
+        <Sidebar provider={p} pendingCount={pendingCount} subscription={s} />
+        <main className="md:ml-[240px] min-h-screen">
+          <div className="mx-auto px-4 md:px-6 pt-6 md:pt-8 pb-24 md:pb-12" style={{ maxWidth: '960px' }}>
+            {children}
+          </div>
+        </main>
+        <MobileNav pendingCount={pendingCount} />
+        <LangPromptBanner />
+      </div>
+    </LanguageProvider>
   );
 }

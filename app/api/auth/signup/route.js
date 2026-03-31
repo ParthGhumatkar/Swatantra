@@ -37,7 +37,7 @@ export async function POST(request) {
 
     const result = await sql`
       INSERT INTO providers (mobile, name, pin_hash, slug, service, city, language)
-      VALUES (${mobile}, ${name}, ${pinHash}, ${slug}, ${service || null}, ${city || null}, ${language || 'en'})
+      VALUES (${mobile}, ${name}, ${pinHash}, ${slug}, ${service || null}, ${city || null}, ${language || 'hi'})
       RETURNING id, mobile, name, slug, service, city, language
     `;
 

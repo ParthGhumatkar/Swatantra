@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyToken } from './lib/auth';
 
-export async function middleware(request) {
+export async function proxy(request) {
   const token = request.cookies.get('token')?.value;
 
   if (!token) {
@@ -20,5 +20,13 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/(dashboard)/:path*'],
+  matcher: [
+    '/dashboard/:path*',
+    '/api/provider/:path*',
+    '/api/bookings/:path*',
+    '/api/availability/:path*',
+    '/api/auth/logout:path*',
+    '/api/auth/change-pin:path*',
+    '/api/upload/:path*',
+  ],
 };

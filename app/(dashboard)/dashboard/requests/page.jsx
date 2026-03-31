@@ -2,13 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Phone, CheckCircle2, XCircle, Copy, Loader2 } from 'lucide-react';
-
-const TABS = [
-  { key: 'all', label: 'All' },
-  { key: 'pending', label: 'Pending' },
-  { key: 'done', label: 'Done' },
-  { key: 'declined', label: 'Declined' },
-];
+import { useLanguage } from '@/lib/i18n/LanguageContext';
 
 function timeAgo(dateString) {
   const s = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000);
@@ -151,6 +145,13 @@ function Toast({ message, visible }) {
 }
 
 export default function RequestsPage() {
+  const { t } = useLanguage();
+  const TABS = [
+    { key: 'all', label: t.requests.tab_all },
+    { key: 'pending', label: t.requests.status.pending },
+    { key: 'done', label: t.requests.tab_done },
+    { key: 'declined', label: t.requests.tab_declined },
+  ];
   const [bookings, setBookings] = useState([]);
   const [total, setTotal] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
@@ -245,22 +246,22 @@ export default function RequestsPage() {
 
   return (
     <div className="space-y-6 fade-in-1">
-      <h1 className="font-display text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>Booking Requests</h1>
+      <h1 className="font-display text-[24px] font-bold" style={{ color: 'var(--text-primary)' }}>{t.requests.title}</h1>
 
       {/* Filter tabs */}
       <div className="flex flex-wrap gap-2 rounded-xl p-1" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-        {TABS.map(t => (
+        {TABS.map(tabItem => (
           <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
+            key={tabItem.key}
+            onClick={() => setTab(tabItem.key)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-body font-medium transition-all duration-150"
             style={{
-              background: tab === t.key ? 'var(--accent-dim)' : 'transparent',
-              color: tab === t.key ? 'var(--accent)' : 'var(--text-secondary)',
-              borderBottom: tab === t.key ? '2px solid var(--accent)' : '2px solid transparent',
+              background: tab === tabItem.key ? 'var(--accent-dim)' : 'transparent',
+              color: tab === tabItem.key ? 'var(--accent)' : 'var(--text-secondary)',
+              borderBottom: tab === tabItem.key ? '2px solid var(--accent)' : '2px solid transparent',
             }}
           >
-            {t.label}
+            {tabItem.label}
           </button>
         ))}
       </div>
@@ -325,7 +326,7 @@ export default function RequestsPage() {
                     style={{ background: 'var(--accent)', color: '#000' }}
                   >
                     {updating === b.id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                    Mark as Done
+                    {t.requests.mark_done}
                   </button>
                   <button
                     onClick={() => setDeclineModal({ open: true, booking: b })}
@@ -333,7 +334,7 @@ export default function RequestsPage() {
                     className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-150 active:scale-95"
                     style={{ border: '1px solid rgba(255,107,107,0.3)', color: 'var(--danger)', background: 'transparent' }}
                   >
-                    <XCircle size={14} /> Decline
+                    <XCircle size={14} /> {t.requests.decline}
                   </button>
                   {b.customer_mobile && (
                     <a
@@ -341,7 +342,7 @@ export default function RequestsPage() {
                       className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-150 active:scale-95"
                       style={{ border: '1px solid var(--border)', color: 'var(--text-primary)' }}
                     >
-                      <Phone size={14} /> Call Customer
+                      <Phone size={14} /> {t.requests.call_customer}
                     </a>
                   )}
                 </div>
@@ -357,7 +358,7 @@ export default function RequestsPage() {
               onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(245,166,35,0.5)'; e.currentTarget.style.color = 'var(--accent)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
             >
-              Load more
+              {t.requests.load_more}
             </button>
           )}
         </div>
